@@ -17,6 +17,36 @@ header{
     padding:20px;
     border-bottom:2px solid gold;
 }
+
+/* ===== Founder Glow Section ===== */
+.founder-section{
+    padding:40px;
+    border-bottom:1px solid gold;
+}
+
+.glow-name{
+    font-size:32px;
+    margin:10px 0;
+    color:gold;
+    animation:goldGlow 2s infinite alternate;
+}
+
+.death-tag{
+    font-size:20px;
+    letter-spacing:4px;
+    color:orange;
+    animation:goldGlow 2s infinite alternate;
+}
+
+@keyframes goldGlow{
+    from{
+        text-shadow:0 0 5px gold, 0 0 10px orange;
+    }
+    to{
+        text-shadow:0 0 20px gold, 0 0 40px orange;
+    }
+}
+
 button{
     background:gold;
     color:black;
@@ -45,6 +75,17 @@ input{
 <p>Together We Hit Hard</p>
 </header>
 
+<!-- ===== Founder Section ===== -->
+<section class="founder-section">
+<h2>Founder / Leader</h2>
+<h3 class="glow-name">Manjit Ojha</h3>
+<h4 class="death-tag">DEATH</h4>
+<p style="color:lightgray;">
+Founder of Outlawz. Leading the brotherhood with loyalty,
+discipline and power since 2025.
+</p>
+</section>
+
 <h2>Member Verification</h2>
 <input type="text" id="verifyID" placeholder="Enter Member ID">
 <br>
@@ -70,10 +111,8 @@ input{
 
 <script>
 
-// Default password
 const ADMIN_PASSWORD = "death1313";
 
-// Load members from storage
 let members = JSON.parse(localStorage.getItem("members")) || [];
 
 function saveMembers(){
