@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Outlawz | Official</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+body{
+    margin:0;
+    font-family:'Oswald', sans-serif;
+    background:black;
+    color:gold;
+    text-align:center;
+    overflow-x:hidden;
+}
+
+/* Fire Intro Screen */
+#intro{
+    position:fixed;
+    width:100%;
+    height:100vh;
+    background:black;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    flex-direction:column;
+    z-index:9999;
+    animation:fadeOut 2s ease 3s forwards;
+}
+
+#intro h1{
+    font-size:55px;
+    color:orange;
+    animation:flicker 1s infinite alternate;
+}
+
+@keyframes flicker{
+    from{opacity:1;}
+    to{opacity:0.5;}
+}
+
+@keyframes fadeOut{
+    to{opacity:0; visibility:hidden;}
+}
+
+header{
+    padding:20px;
+    border-bottom:2px solid gold;
+}
+
+.logo{
+    font-size:40px;
+    font-weight:bold;
+}
+
+.motto{
+    letter-spacing:3px;
+    font-size:18px;
+}
+
+section{
+    padding:60px 20px;
+}
+
+button{
+    background:gold;
+    color:black;
+    padding:12px 25px;
+    border:none;
+    font-weight:bold;
+    cursor:pointer;
+    border-radius:5px;
+}
+
+input{
+    padding:10px;
+    margin:10px;
+    width:220px;
+    border:none;
+    border-radius:5px;
+}
+
+footer{
+    border-top:1px solid gold;
+    padding:20px;
+    font-size:14px;
+}
+</style>
+</head>
+
+<body>
+
+<div id="intro">
+    <h1>OUTLAWZ</h1>
+    <p>Together We Hit Hard</p>
+</div>
+
+<header>
+    <div class="logo">OUTLAWZ</div>
+    <div class="motto">TOGETHER WE HIT HARD</div>
+</header>
+
+<section>
+    <h2>About Outlawz</h2>
+    <p>
+        Established in 2025, Outlawz is a united brotherhood built on loyalty,
+        discipline, respect, and elite road presence.
+        We ride together. We stand together. We hit hard together.
+    </p>
+</section>
+
+<section>
+    <h2>Our Values</h2>
+    <p>Brotherhood | Loyalty | Respect | Power</p>
+</section>
+
+<section>
+    <h2>Member Verification</h2>
+    <input type="text" id="memberID" placeholder="Enter Member ID">
+    <br>
+    <button onclick="verifyMember()">Verify</button>
+    <p id="result"></p>
+</section>
+
+<footer>
+    © 2025 Outlawz | All Rights Reserved
+</footer>
+
+<script>
+function verifyMember(){
+    const validIDs = ["DEATH001","TH007","CYCLONE003","RFTR46","MCN33"];
+    const input = document.getElementById("memberID").value.toUpperCase();
+    const result = document.getElementById("result");
+
+    if(validIDs.includes(input)){
+        result.innerHTML = "✔ Verified Member";
+        result.style.color = "lightgreen";
+    } else {
+        result.innerHTML = "✖ Invalid Member ID";
+        result.style.color = "red";
+    }
+}
+</script>
+
+</body>
+</html>
