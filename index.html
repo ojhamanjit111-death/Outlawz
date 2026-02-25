@@ -8,43 +8,49 @@
 <style>
 body{
     margin:0;
-    background:black;
+    font-family:Arial, sans-serif;
     color:gold;
-    font-family:Arial;
+    background:black;
     text-align:center;
+    overflow-x:hidden;
 }
+
+/* 🔥 REALISTIC FIRE BACKGROUND */
+body::before{
+    content:"";
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:radial-gradient(circle at 50% 100%, #ff4500 0%, #ff0000 30%, #000 70%);
+    animation:fireMove 3s infinite alternate ease-in-out;
+    z-index:-1;
+    opacity:0.5;
+}
+
+@keyframes fireMove{
+    0%{ transform:scale(1); filter:blur(0px);}
+    100%{ transform:scale(1.05); filter:blur(2px);}
+}
+
 header{
     padding:20px;
     border-bottom:2px solid gold;
 }
 
-/* ===== Founder Glow Section ===== */
-.founder-section{
-    padding:40px;
+section{
+    padding:30px;
     border-bottom:1px solid gold;
 }
 
-.glow-name{
-    font-size:32px;
-    margin:10px 0;
-    color:gold;
-    animation:goldGlow 2s infinite alternate;
-}
-
-.death-tag{
-    font-size:20px;
-    letter-spacing:4px;
-    color:orange;
+.glow{
     animation:goldGlow 2s infinite alternate;
 }
 
 @keyframes goldGlow{
-    from{
-        text-shadow:0 0 5px gold, 0 0 10px orange;
-    }
-    to{
-        text-shadow:0 0 20px gold, 0 0 40px orange;
-    }
+    from{ text-shadow:0 0 5px gold,0 0 10px orange; }
+    to{ text-shadow:0 0 25px gold,0 0 50px orange; }
 }
 
 button{
@@ -54,15 +60,31 @@ button{
     border:none;
     margin:5px;
     cursor:pointer;
+    font-weight:bold;
 }
-input{
+
+input, textarea{
     padding:10px;
     margin:5px;
+    width:80%;
+    max-width:400px;
 }
+
+.notice-box{
+    background:rgba(0,0,0,0.7);
+    border:1px solid gold;
+    padding:15px;
+    margin:15px auto;
+    width:85%;
+    max-width:600px;
+    text-align:left;
+    box-shadow:0 0 15px orange;
+}
+
 .admin-panel{
     display:none;
-    margin-top:20px;
     border-top:1px solid gold;
+    margin-top:20px;
     padding-top:20px;
 }
 </style>
@@ -71,99 +93,80 @@ input{
 <body>
 
 <header>
-<h1>OUTLAWZ</h1>
+<h1 class="glow">OUTLAWZ</h1>
 <p>Together We Hit Hard</p>
 </header>
 
-<!-- ===== Founder Section ===== -->
-<section class="founder-section">
-<h2>Founder / Leader</h2>
-<h3 class="glow-name">Manjit Ojha</h3>
-<h4 class="death-tag">DEATH</h4>
-<p style="color:lightgray;">
-Founder of Outlawz. Leading the brotherhood with loyalty,
-discipline and power since 2025.
-</p>
+<section>
+<h2>Founder</h2>
+<h3 class="glow">Manjit Ojha</h3>
+<h4 style="color:orange;">DEATH</h4>
 </section>
 
-<h2>Member Verification</h2>
-<input type="text" id="verifyID" placeholder="Enter Member ID">
-<br>
-<button onclick="verify()">Verify</button>
-<p id="result"></p>
+<!-- 📢 NOTICE BOARD -->
+<section>
+<h2>🔥 Official Announcements</h2>
+<div id="noticeBoard"></div>
+</section>
 
-<hr>
-
-<h2>Admin Login</h2>
-<input type="password" id="adminPass" placeholder="Enter Admin Password">
+<!-- 🔐 ADMIN LOGIN -->
+<section>
+<h2>Founder Login</h2>
+<input type="password" id="adminPass" placeholder="Enter Founder Password">
 <br>
 <button onclick="login()">Login</button>
 
 <div class="admin-panel" id="adminPanel">
-<h3>Admin Panel</h3>
-
-<input type="text" id="newMember" placeholder="New Member ID">
-<button onclick="addMember()">Add Member</button>
-
-<h4>Member List</h4>
-<ul id="memberList"></ul>
+<h3>Post Announcement</h3>
+<textarea id="newNotice" rows="4" placeholder="Write announcement..."></textarea>
+<br>
+<button onclick="addNotice()">Post</button>
 </div>
+</section>
 
 <script>
 
-const ADMIN_PASSWORD = "death1313";
+const FOUNDER_PASSWORD = "death1313";
 
-let members = JSON.parse(localStorage.getItem("members")) || [];
+let notices = JSON.parse(localStorage.getItem("notices")) || [];
 
-function saveMembers(){
-    localStorage.setItem("members", JSON.stringify(members));
-    displayMembers();
-}
-
-function verify(){
-    const id = document.getElementById("verifyID").value.toUpperCase();
-    const result = document.getElementById("result");
-
-    if(members.includes(id)){
-        result.innerHTML = "✔ Verified Member";
-        result.style.color = "lightgreen";
-    } else {
-        result.innerHTML = "✖ Invalid Member ID";
-        result.style.color = "red";
-    }
+function saveNotices(){
+    localStorage.setItem("notices", JSON.stringify(notices));
+    displayNotices();
 }
 
 function login(){
     const pass = document.getElementById("adminPass").value;
-
-    if(pass === ADMIN_PASSWORD){
+    if(pass === FOUNDER_PASSWORD){
         document.getElementById("adminPanel").style.display = "block";
-        displayMembers();
+        alert("Founder Access Granted");
     } else {
-        alert("Wrong Password");
+        alert("Access Denied");
     }
 }
 
-function addMember(){
-    const newID = document.getElementById("newMember").value.toUpperCase();
-    if(newID && !members.includes(newID)){
-        members.push(newID);
-        saveMembers();
-        document.getElementById("newMember").value = "";
+function addNotice(){
+    const text = document.getElementById("newNotice").value;
+    if(text){
+        const date = new Date().toLocaleString();
+        notices.unshift({text, date});
+        saveNotices();
+        document.getElementById("newNotice").value="";
     }
 }
 
-function displayMembers(){
-    const list = document.getElementById("memberList");
-    list.innerHTML = "";
-    members.forEach(member => {
-        const li = document.createElement("li");
-        li.textContent = member;
-        list.appendChild(li);
+function displayNotices(){
+    const board = document.getElementById("noticeBoard");
+    board.innerHTML="";
+    notices.forEach(n=>{
+        const div=document.createElement("div");
+        div.className="notice-box";
+        div.innerHTML="<strong>"+n.date+"</strong><br>"+n.text;
+        board.appendChild(div);
     });
 }
 
-displayMembers();
+displayNotices();
 
 </script>
 
