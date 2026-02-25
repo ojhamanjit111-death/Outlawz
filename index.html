@@ -9,13 +9,13 @@
 body{
     margin:0;
     font-family:Arial, sans-serif;
-    color:gold;
     background:black;
+    color:gold;
     text-align:center;
     overflow-x:hidden;
 }
 
-/* 🔥 REALISTIC FIRE BACKGROUND */
+/* 🔥 FIRE BACKGROUND */
 body::before{
     content:"";
     position:fixed;
@@ -56,7 +56,7 @@ section{
 button{
     background:gold;
     color:black;
-    padding:10px 20px;
+    padding:10px 15px;
     border:none;
     margin:5px;
     cursor:pointer;
@@ -81,6 +81,32 @@ input, textarea{
     box-shadow:0 0 15px orange;
 }
 
+.notice-box img{
+    width:100%;
+    margin-top:10px;
+    border:1px solid gold;
+}
+
+#gallery{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+    gap:15px;
+    width:90%;
+    max-width:900px;
+    margin:auto;
+}
+
+.gallery-img{
+    width:100%;
+    border:2px solid gold;
+    box-shadow:0 0 10px orange;
+    transition:0.3s;
+}
+
+.gallery-img:hover{
+    transform:scale(1.05);
+}
+
 .admin-panel{
     display:none;
     border-top:1px solid gold;
@@ -103,13 +129,19 @@ input, textarea{
 <h4 style="color:orange;">DEATH</h4>
 </section>
 
-<!-- 📢 NOTICE BOARD -->
+<!-- 📢 ANNOUNCEMENTS -->
 <section>
 <h2>🔥 Official Announcements</h2>
 <div id="noticeBoard"></div>
 </section>
 
-<!-- 🔐 ADMIN LOGIN -->
+<!-- 📸 GALLERY -->
+<section>
+<h2>🔥 Outlawz Gallery</h2>
+<div id="gallery"></div>
+</section>
+
+<!-- 👑 FOUNDER LOGIN -->
 <section>
 <h2>Founder Login</h2>
 <input type="password" id="adminPass" placeholder="Enter Founder Password">
@@ -117,10 +149,21 @@ input, textarea{
 <button onclick="login()">Login</button>
 
 <div class="admin-panel" id="adminPanel">
+
 <h3>Post Announcement</h3>
 <textarea id="newNotice" rows="4" placeholder="Write announcement..."></textarea>
 <br>
-<button onclick="addNotice()">Post</button>
+<input type="file" id="noticeImage" accept="image/*">
+<br>
+<button onclick="addNotice()">Post Announcement</button>
+
+<hr>
+
+<h3>Upload to Gallery</h3>
+<input type="file" id="galleryImage" accept="image/*">
+<br>
+<button onclick="addToGallery()">Upload Image</button>
+
 </div>
 </section>
 
@@ -129,11 +172,7 @@ input, textarea{
 const FOUNDER_PASSWORD = "death1313";
 
 let notices = JSON.parse(localStorage.getItem("notices")) || [];
-
-function saveNotices(){
-    localStorage.setItem("notices", JSON.stringify(notices));
-    displayNotices();
-}
+let galleryImages = JSON.parse(localStorage.getItem("galleryImages")) || [];
 
 function login(){
     const pass = document.getElementById("adminPass").value;
@@ -145,14 +184,39 @@ function login(){
     }
 }
 
+/* 🔥 ANNOUNCEMENTS */
+
+function saveNotices(){
+    localStorage.setItem("notices", JSON.stringify(notices));
+    displayNotices();
+}
+
 function addNotice(){
     const text = document.getElementById("newNotice").value;
-    if(text){
-        const date = new Date().toLocaleString();
-        notices.unshift({text, date});
+    const fileInput = document.getElementById("noticeImage");
+    const file = fileInput.files[0];
+    if(!text && !file) return;
+
+    const date = new Date().toLocaleString();
+
+    if(file){
+        const reader = new FileReader();
+        reader.onload = function(e){
+            notices.unshift({
+                text:text,
+                date:date,
+                image:e.target.result
+            });
+            saveNotices();
+        };
+        reader.readAsDataURL(file);
+    } else {
+        notices.unshift({text:text,date:date});
         saveNotices();
-        document.getElementById("newNotice").value="";
     }
+
+    document.getElementById("newNotice").value="";
+    fileInput.value="";
 }
 
 function displayNotices(){
@@ -161,12 +225,50 @@ function displayNotices(){
     notices.forEach(n=>{
         const div=document.createElement("div");
         div.className="notice-box";
-        div.innerHTML="<strong>"+n.date+"</strong><br>"+n.text;
+        div.innerHTML="<strong>"+n.date+"</strong><br>"+(n.text||"");
+        if(n.image){
+            div.innerHTML+="<img src='"+n.image+"'>";
+        }
         board.appendChild(div);
     });
 }
 
 displayNotices();
+
+/* 📸 GALLERY */
+
+function saveGallery(){
+    localStorage.setItem("galleryImages", JSON.stringify(galleryImages));
+    displayGallery();
+}
+
+function addToGallery(){
+    const fileInput = document.getElementById("galleryImage");
+    const file = fileInput.files[0];
+    if(!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e){
+        galleryImages.unshift(e.target.result);
+        saveGallery();
+    };
+    reader.readAsDataURL(file);
+
+    fileInput.value="";
+}
+
+function displayGallery(){
+    const gallery=document.getElementById("gallery");
+    gallery.innerHTML="";
+    galleryImages.forEach(img=>{
+        const image=document.createElement("img");
+        image.src=img;
+        image.className="gallery-img";
+        gallery.appendChild(image);
+    });
+}
+
+displayGallery();
 
 </script>
 
