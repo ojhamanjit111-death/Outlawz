@@ -8,16 +8,56 @@
 <style>
 body{background:black;color:gold;font-family:Arial;text-align:center}
 section{padding:20px;border-bottom:1px solid gold}
-input,textarea{padding:8px;margin:5px;width:80%}
-button{padding:8px;background:gold;color:black;cursor:pointer;margin:5px}
+input,textarea{padding:10px;margin:5px;width:80%}
+button{padding:8px;background:gold;color:black;margin:5px;cursor:pointer}
 
-.card{background:#111;border:1px solid gold;margin:10px auto;padding:10px;max-width:400px}
+.card{
+ background:#111;
+ border:1px solid gold;
+ margin:10px auto;
+ padding:10px;
+ max-width:400px;
+ cursor:pointer;
+}
 .card img{width:100%;height:200px;object-fit:cover}
 
-#gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px}
-.gallery-img{width:100%;height:120px;object-fit:cover;border:2px solid gold}
+#gallery{
+ display:grid;
+ grid-template-columns:repeat(auto-fit,minmax(120px,1fr));
+ gap:10px;
+}
+.gallery-img{
+ width:100%;
+ height:120px;
+ object-fit:cover;
+ border:2px solid gold;
+}
 
 .admin{display:none}
+
+/* FOUNDER */
+.founder-card{
+ background:#111;
+ border:2px solid gold;
+ padding:20px;
+ max-width:400px;
+ margin:auto;
+ box-shadow:0 0 20px orange;
+}
+.alias{color:red;font-weight:bold}
+.tagline{color:orange;font-style:italic}
+
+/* MODALS */
+#imgModal,#profileModal{
+ display:none;
+ position:fixed;
+ top:0;left:0;
+ width:100%;height:100%;
+ background:rgba(0,0,0,0.95);
+ justify-content:center;
+ align-items:center;
+ z-index:999;
+}
 </style>
 </head>
 
@@ -25,11 +65,21 @@ button{padding:8px;background:gold;color:black;cursor:pointer;margin:5px}
 
 <h1>OUTLAWZ</h1>
 
+<!-- FOUNDER -->
+<section>
+<h2>👑 Founder</h2>
+<div class="founder-card">
+<h3>Manjit Ojha</h3>
+<p class="alias">AKA: DEATH</p>
+<p class="tagline">Together We Hit Hard</p>
+</div>
+</section>
+
 <!-- ADMIN LOGIN -->
 <section>
 <h2>Admin Login</h2>
-<input id="user" placeholder="Username">
-<input id="pass" type="password" placeholder="Password">
+<input id="user" placeholder="Username"><br>
+<input id="pass" type="password" placeholder="Password"><br>
 <button onclick="adminLogin()">Login</button>
 </section>
 
@@ -38,7 +88,6 @@ button{padding:8px;background:gold;color:black;cursor:pointer;margin:5px}
 <h2>Join Outlawz</h2>
 <input id="name" placeholder="Name"><br>
 <input id="bike" placeholder="Bike"><br>
-<textarea id="msg" placeholder="Why join?"></textarea><br>
 <input type="file" id="photo"><br>
 <button onclick="join()">Join</button>
 </section>
@@ -55,35 +104,10 @@ button{padding:8px;background:gold;color:black;cursor:pointer;margin:5px}
 <div id="gallery"></div>
 
 <div class="admin" id="galleryAdmin">
-<input type="file" id="gimg" multiple>
-<input id="caption" placeholder="Caption">
+<input type="file" id="gimg" multiple><br>
+<input id="gcap" placeholder="Caption"><br>
 <button onclick="uploadGallery()">Upload</button>
 </div>
-</section>
-
-<!-- CHAT -->
-<section>
-<h2>Crew Chat</h2>
-<div id="chatBox"></div>
-<input id="chatMsg" placeholder="Message">
-<button onclick="sendMsg()">Send</button>
-</section>
-
-<!-- EVENTS -->
-<section>
-<h2>Ride Events</h2>
-<div id="events"></div>
-
-<div class="admin">
-<input id="eventText" placeholder="New Event">
-<button onclick="addEvent()">Add Event</button>
-</div>
-</section>
-
-<!-- ACTIVITY -->
-<section>
-<h2>Activity Feed</h2>
-<div id="feed"></div>
 </section>
 
 <!-- ADMIN PANEL -->
@@ -92,27 +116,50 @@ button{padding:8px;background:gold;color:black;cursor:pointer;margin:5px}
 <div id="requests"></div>
 </section>
 
+<!-- IMAGE MODAL -->
+<div id="imgModal">
+<span onclick="closeImage()" style="position:absolute;top:20px;right:30px;font-size:30px;color:white;cursor:pointer">✖</span>
+<img id="modalImg" style="max-width:90%;max-height:90%">
+</div>
+
+<!-- PROFILE MODAL -->
+<div id="profileModal">
+<div style="background:black;padding:20px;border:2px solid gold;width:90%;max-width:400px">
+<span onclick="closeProfile()" style="float:right;color:red;cursor:pointer">✖</span>
+<img id="pImg" style="width:100%;height:200px;object-fit:cover"><br>
+<h2 id="pName"></h2>
+<p id="pBike"></p>
+<p id="pRank"></p>
+<p id="pId"></p>
+</div>
+</div>
+
 <script type="module">
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
 const firebaseConfig = {
-  apiKey:"YOUR_KEY",
-  authDomain:"YOUR_DOMAIN",
-  projectId:"YOUR_ID",
-  storageBucket:"YOUR_BUCKET"
+ apiKey:"YOUR_KEY",
+ authDomain:"YOUR_DOMAIN",
+ projectId:"YOUR_ID",
+ storageBucket:"YOUR_BUCKET"
 };
 
 const app=initializeApp(firebaseConfig);
 const db=getFirestore(app);
 const storage=getStorage(app);
 
-/* ADMIN LOGIN (demo only) */
+let isAdmin=false;
+
+/* ADMIN LOGIN */
 window.adminLogin=()=>{
  if(user.value==="Death" && pass.value==="death1313"){
+  isAdmin=true;
   document.querySelectorAll(".admin").forEach(x=>x.style.display="block");
   loadRequests();
+  loadGallery();
  }
 }
 
@@ -128,27 +175,28 @@ window.join=async()=>{
  let id="OUT"+Math.floor(Math.random()*10000);
 
  await addDoc(collection(db,"members"),{
-  name:name.value,bike:bike.value,msg:msg.value,
-  photo:url,status:"pending",id:id
+  name:name.value,bike:bike.value,photo:url,status:"pending",id
  });
 
- addFeed(name.value+" requested to join 🔥");
+ alert("Request Sent");
 }
 
-/* APPROVAL */
+/* LOAD REQUESTS */
 async function loadRequests(){
  let snap=await getDocs(collection(db,"members"));
  requests.innerHTML="";
  snap.forEach(d=>{
-  let data=d.data();
-  if(data.status==="pending"){
+  let x=d.data();
+  if(x.status==="pending"){
    let div=document.createElement("div");
    div.className="card";
    div.innerHTML=`
-    <img src="${data.photo}">
-    ${data.name} (${data.bike})
+    <img src="${x.photo}">
+    ${x.name} (${x.bike})
     <select id="r-${d.id}">
-     <option>Prospect</option><option>Rider</option><option>Leader</option>
+     <option>Prospect</option>
+     <option>Rider</option>
+     <option>Leader</option>
     </select>
     <button onclick="approve('${d.id}')">Approve</button>
    `;
@@ -157,10 +205,10 @@ async function loadRequests(){
  });
 }
 
+/* APPROVE */
 window.approve=async(id)=>{
  let rank=document.getElementById("r-"+id).value;
  await updateDoc(doc(db,"members",id),{status:"approved",rank});
- addFeed("Member approved 👑");
  loadMembers();
  loadRequests();
 }
@@ -174,105 +222,92 @@ async function loadMembers(){
   if(x.status==="approved"){
    let div=document.createElement("div");
    div.className="card";
+   div.onclick=()=>openProfile(x);
    div.innerHTML=`
     <img src="${x.photo}">
     <b>${x.name}</b><br>
     🏍 ${x.bike}<br>
     👑 ${x.rank}<br>
-    🪪 ${x.id}<br>
-    ❤️ <span id="like-${d.id}">${x.likes||0}</span>
-    <button onclick="likeMember('${d.id}',${x.likes||0})">Like</button>
    `;
    members.appendChild(div);
   }
  });
 }
-window.likeMember=async(id,count)=>{
- await updateDoc(doc(db,"members",id),{likes:count+1});
- addFeed("Someone liked a member ❤️");
- loadMembers();
+
+/* PROFILE */
+window.openProfile=(x)=>{
+ profileModal.style.display="flex";
+ pImg.src=x.photo;
+ pName.innerText=x.name;
+ pBike.innerText="🏍 "+x.bike;
+ pRank.innerText="👑 "+x.rank;
+ pId.innerText="🪪 "+x.id;
 }
+window.closeProfile=()=>profileModal.style.display="none";
 
 /* GALLERY */
 window.uploadGallery=async()=>{
- for(let f of gimg.files){
+ let files=gimg.files;
+ let cap=gcap.value;
+
+ for(let f of files){
   let r=ref(storage,"gallery/"+Date.now()+f.name);
   await uploadBytes(r,f);
   let url=await getDownloadURL(r);
-  await addDoc(collection(db,"gallery"),{img:url,cap:caption.value,likes:0});
+
+  await addDoc(collection(db,"gallery"),{img:url,caption:cap});
  }
- addFeed("New gallery images added 📸");
+
  loadGallery();
 }
 
 async function loadGallery(){
  let snap=await getDocs(collection(db,"gallery"));
  gallery.innerHTML="";
+
  snap.forEach(d=>{
   let x=d.data();
-  let img=document.createElement("div");
-  img.innerHTML=`
-   <img src="${x.img}" class="gallery-img">
-   <small>${x.cap||""}</small><br>
-   ❤️ ${x.likes}
+  let div=document.createElement("div");
+  div.style.position="relative";
+
+  div.innerHTML=`
+   <img src="${x.img}" class="gallery-img" onclick="openImage('${x.img}')">
+   <small>${x.caption||""}</small>
   `;
-  gallery.appendChild(img);
+
+  if(isAdmin){
+   let btn=document.createElement("button");
+   btn.innerText="X";
+   btn.style.position="absolute";
+   btn.style.top="5px";
+   btn.style.right="5px";
+   btn.style.background="red";
+   btn.onclick=()=>deleteImage(d.id);
+   div.appendChild(btn);
+  }
+
+  gallery.appendChild(div);
  });
 }
 
-/* CHAT */
-window.sendMsg=async()=>{
- if(!chatMsg.value)return;
- await addDoc(collection(db,"chat"),{msg:chatMsg.value});
- chatMsg.value="";
-}
-async function loadChat(){
- let snap=await getDocs(collection(db,"chat"));
- chatBox.innerHTML="";
- snap.forEach(d=>{
-  let p=document.createElement("p");
-  p.innerText=d.data().msg;
-  chatBox.appendChild(p);
- });
-}
-setInterval(loadChat,3000);
-
-/* EVENTS */
-window.addEvent=async()=>{
- await addDoc(collection(db,"events"),{text:eventText.value});
- addFeed("New ride event added 🏍");
- loadEvents();
-}
-async function loadEvents(){
- let snap=await getDocs(collection(db,"events"));
- events.innerHTML="";
- snap.forEach(d=>{
-  let p=document.createElement("p");
-  p.innerText=d.data().text;
-  events.appendChild(p);
- });
+window.deleteImage=async(id)=>{
+ if(confirm("Delete image?")){
+  await deleteDoc(doc(db,"gallery",id));
+  loadGallery();
+ }
 }
 
-/* ACTIVITY */
-async function addFeed(text){
- await addDoc(collection(db,"feed"),{text});
- loadFeed();
+/* IMAGE VIEW */
+window.openImage=(src)=>{
+ imgModal.style.display="flex";
+ modalImg.src=src;
 }
-async function loadFeed(){
- let snap=await getDocs(collection(db,"feed"));
- feed.innerHTML="";
- snap.forEach(d=>{
-  let p=document.createElement("p");
-  p.innerText=d.data().text;
-  feed.appendChild(p);
- });
-}
+window.closeImage=()=>imgModal.style.display="none";
 
 /* INIT */
 loadMembers();
 loadGallery();
-loadEvents();
-loadFeed();
+
 </script>
 
 </body>
