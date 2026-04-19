@@ -1,36 +1,34 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Outlawz Crew</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
-
 <style>
-body{font-family:'Orbitron',sans-serif;background:black;color:gold;text-align:center}
-section{padding:30px;border-bottom:1px solid gold}
-button{background:gold;color:black;padding:10px;margin:5px;cursor:pointer}
+body{background:black;color:gold;text-align:center;font-family:Arial}
+section{padding:25px;border-bottom:1px solid gold}
 input,textarea{padding:10px;margin:5px;width:80%}
+button{background:gold;color:black;padding:10px;margin:5px;cursor:pointer}
 
 .card{
- background:rgba(0,0,0,.7);
+ background:#111;
  border:1px solid gold;
- margin:15px auto;
- padding:15px;
+ margin:10px auto;
+ padding:10px;
  max-width:400px;
 }
-.card img{
- width:100%;
- height:200px;
- object-fit:cover;
+.card img{width:100%;height:200px;object-fit:cover}
+
+#gallery{
+ display:grid;
+ grid-template-columns:repeat(auto-fit,minmax(120px,1fr));
+ gap:10px;
+}
+.gallery-img{
+ width:100%;height:120px;object-fit:cover;
  border:2px solid gold;
 }
-
-.rank-Leader{color:red}
-.rank-Rider{color:gold}
-.rank-Mechanic{color:cyan}
-.rank-Prospect{color:gray}
 
 .admin{display:none}
 </style>
@@ -40,15 +38,21 @@ input,textarea{padding:10px;margin:5px;width:80%}
 
 <h1>OUTLAWZ</h1>
 
+<!-- ADMIN LOGIN -->
+<section>
+<h2>Admin Login</h2>
+<input id="user" placeholder="Username"><br>
+<input id="pass" type="password" placeholder="Password"><br>
+<button onclick="adminLogin()">Login</button>
+</section>
+
 <!-- JOIN -->
 <section>
 <h2>Join Outlawz</h2>
 <input id="name" placeholder="Name"><br>
 <input id="bike" placeholder="Bike"><br>
-<textarea id="msg" placeholder="Why join?"></textarea><br>
 <input type="file" id="photo"><br>
 <button onclick="join()">Join</button>
-<p id="status"></p>
 </section>
 
 <!-- MEMBERS -->
@@ -57,145 +61,174 @@ input,textarea{padding:10px;margin:5px;width:80%}
 <div id="members"></div>
 </section>
 
-<!-- LOGIN -->
+<!-- GALLERY -->
 <section>
-<h2>Founder Login</h2>
-<input id="email" placeholder="Email"><br>
-<input id="password" type="password" placeholder="Password"><br>
-<button onclick="login()">Login</button>
+<h2>Gallery</h2>
+<div id="gallery"></div>
 
-<div class="admin" id="admin">
-<h3>Join Requests</h3>
-<div id="requests"></div>
+<div class="admin" id="galleryAdmin">
+<h3>Upload Images</h3>
+<input type="file" id="gimg" multiple><br>
+<button onclick="uploadGallery()">Upload</button>
 </div>
+</section>
+
+<!-- ADMIN PANEL -->
+<section class="admin" id="admin">
+<h2>Join Requests</h2>
+<div id="requests"></div>
 </section>
 
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getFirestore, collection, addDoc, getDocs, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
 const firebaseConfig = {
-  apiKey: "YOUR_FIREBASE_CONFIG",
+  apiKey: "YOUR_KEY",
+  authDomain: "YOUR_DOMAIN",
+  projectId: "YOUR_ID",
+  storageBucket: "YOUR_BUCKET"
 };
 
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
 const db = getFirestore(app);
 const storage = getStorage(app);
 
-// JOIN
+/* 🔐 SIMPLE ADMIN LOGIN */
+window.adminLogin = function(){
+ let u=document.getElementById("user").value;
+ let p=document.getElementById("pass").value;
+
+ if(u==="Death" && p==="death1313"){
+  document.getElementById("admin").style.display="block";
+  document.getElementById("galleryAdmin").style.display="block";
+  loadRequests();
+ }
+ else alert("Wrong login");
+}
+
+/* JOIN */
 window.join = async ()=>{
  let name=document.getElementById("name").value;
  let bike=document.getElementById("bike").value;
- let msg=document.getElementById("msg").value;
  let file=document.getElementById("photo").files[0];
 
  if(!name||!bike||!file)return;
 
- const storageRef=ref(storage,"profiles/"+Date.now()+file.name);
- await uploadBytes(storageRef,file);
- const url=await getDownloadURL(storageRef);
+ const refImg=ref(storage,"profiles/"+Date.now()+file.name);
+ await uploadBytes(refImg,file);
+ const url=await getDownloadURL(refImg);
 
  await addDoc(collection(db,"requests"),{
-  name,bike,msg,photo:url,status:"pending"
+  name,bike,photo:url,status:"pending"
  });
 
- document.getElementById("status").innerText="Request Sent 🔥";
+ alert("Request Sent");
 };
 
-// LOGIN
-window.login=()=>{
- let email=document.getElementById("email").value;
- let password=document.getElementById("password").value;
-
- signInWithEmailAndPassword(auth,email,password)
-  .then(()=>alert("Access Granted"))
-  .catch(()=>alert("Error"));
-};
-
-// AUTH STATE
-onAuthStateChanged(auth,user=>{
- if(user){
-  admin.style.display="block";
-  loadRequests();
- }
-});
-
-// LOAD REQUESTS
+/* LOAD REQUESTS */
 async function loadRequests(){
- let container=document.getElementById("requests");
- container.innerHTML="";
+ let box=document.getElementById("requests");
+ box.innerHTML="";
 
  let snap=await getDocs(collection(db,"requests"));
 
- snap.forEach(docu=>{
-  let d=docu.data();
+ snap.forEach(d=>{
+  let data=d.data();
 
   let div=document.createElement("div");
   div.className="card";
 
   div.innerHTML=`
-   <img src="${d.photo}">
-   <b>${d.name}</b> (${d.bike})<br>
-   ${d.msg}<br>
+   <img src="${data.photo}">
+   <b>${data.name}</b> (${data.bike})<br>
 
-   <select id="rank-${docu.id}">
+   <select id="rank-${d.id}">
     <option>Prospect</option>
     <option>Rider</option>
-    <option>Mechanic</option>
     <option>Leader</option>
    </select>
 
-   <button onclick="approve('${docu.id}')">Approve</button>
+   <button onclick="approve('${d.id}')">Approve</button>
   `;
 
-  container.appendChild(div);
+  box.appendChild(div);
  });
 }
 
-// APPROVE
-window.approve=async(id)=>{
- let rank=document.getElementById(`rank-${id}`).value;
+/* APPROVE */
+window.approve = async (id)=>{
+ let rank=document.getElementById("rank-"+id).value;
 
  await updateDoc(doc(db,"requests",id),{
   status:"approved",
-  rank:rank
+  rank
  });
 
  loadMembers();
  loadRequests();
 };
 
-// LOAD MEMBERS
+/* MEMBERS */
 async function loadMembers(){
- let container=document.getElementById("members");
- container.innerHTML="";
+ let box=document.getElementById("members");
+ box.innerHTML="";
 
  let snap=await getDocs(collection(db,"requests"));
 
- snap.forEach(docu=>{
-  let d=docu.data();
+ snap.forEach(d=>{
+  let data=d.data();
 
-  if(d.status==="approved"){
+  if(data.status==="approved"){
    let div=document.createElement("div");
    div.className="card";
 
    div.innerHTML=`
-    <img src="${d.photo}">
-    <b>${d.name}</b><br>
-    🏍 ${d.bike}<br>
-    <span class="rank-${d.rank}">👑 ${d.rank}</span>
+    <img src="${data.photo}">
+    <b>${data.name}</b><br>
+    🏍 ${data.bike}<br>
+    👑 ${data.rank}
    `;
 
-   container.appendChild(div);
+   box.appendChild(div);
   }
  });
 }
 
+/* GALLERY UPLOAD */
+window.uploadGallery = async ()=>{
+ let files=document.getElementById("gimg").files;
+
+ for(let f of files){
+  const r=ref(storage,"gallery/"+Date.now()+f.name);
+  await uploadBytes(r,f);
+  const url=await getDownloadURL(r);
+
+  await addDoc(collection(db,"gallery"),{img:url});
+ }
+
+ loadGallery();
+};
+
+/* LOAD GALLERY */
+async function loadGallery(){
+ let g=document.getElementById("gallery");
+ g.innerHTML="";
+
+ let snap=await getDocs(collection(db,"gallery"));
+
+ snap.forEach(d=>{
+  let img=document.createElement("img");
+  img.src=d.data().img;
+  img.className="gallery-img";
+  g.appendChild(img);
+ });
+}
+
 loadMembers();
+loadGallery();
 
 </script>
 
