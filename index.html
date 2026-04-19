@@ -5,237 +5,198 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Outlawz Crew</title>
 
-<!-- Google Font -->
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
 
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{
-    font-family:'Orbitron',sans-serif;
-    background:black;
-    color:gold;
-    overflow-x:hidden;
-}
+body{font-family:'Orbitron',sans-serif;background:black;color:gold;text-align:center}
+section{padding:30px;border-bottom:1px solid gold}
+button{background:gold;color:black;padding:10px;margin:5px;cursor:pointer}
+input,textarea{padding:10px;margin:5px;width:80%}
 
-/* 🔥 Animated Background */
-body::before{
-    content:"";
-    position:fixed;
-    width:100%;height:100%;
-    background:radial-gradient(circle at 50% 100%, #ff4500 0%, #ff0000 30%, #000 70%);
-    animation:fireMove 4s infinite alternate ease-in-out;
-    z-index:-1;opacity:.4;
-}
-@keyframes fireMove{from{transform:scale(1)}to{transform:scale(1.08)}}
-
-/* Loader */
-#loader{
- position:fixed;
- width:100%;height:100%;
- background:black;
- display:flex;
- justify-content:center;
- align-items:center;
- font-size:28px;
- z-index:9999;
-}
-
-header{
- text-align:center;
- padding:25px;
- border-bottom:2px solid gold;
-}
-header h1{font-size:42px;letter-spacing:3px}
-
-section{
- padding:40px 20px;
- text-align:center;
- border-bottom:1px solid rgba(255,215,0,0.3);
-}
-
-button{
- background:gold;color:black;
- padding:10px 16px;border:none;
- margin:5px;cursor:pointer;
- font-weight:bold;
- transition:.3s;
-}
-button:hover{box-shadow:0 0 15px gold;transform:scale(1.05)}
-
-input,textarea{
- width:90%;max-width:400px;
- padding:10px;margin:8px;
-}
-
-/* Cards */
 .card{
  background:rgba(0,0,0,.7);
  border:1px solid gold;
- padding:15px;margin:15px auto;
- max-width:600px;
- box-shadow:0 0 15px orange;
+ margin:15px auto;
+ padding:15px;
+ max-width:400px;
 }
-.card img{width:100%;margin-top:10px}
-
-/* Gallery */
-#gallery{
- display:grid;
- grid-template-columns:repeat(auto-fit,minmax(130px,1fr));
- gap:12px;
- max-width:1000px;margin:auto;
-}
-.gallery-img{
- width:100%;height:130px;
+.card img{
+ width:100%;
+ height:200px;
  object-fit:cover;
  border:2px solid gold;
- cursor:pointer;
- transition:.3s;
 }
-.gallery-img:hover{transform:scale(1.1)}
 
-/* Modal */
-#modal{
- display:none;
- position:fixed;
- width:100%;height:100%;
- background:rgba(0,0,0,.95);
- justify-content:center;
- align-items:center;
- z-index:999;
-}
-#modal img{max-width:90%;max-height:90%}
+.rank-Leader{color:red}
+.rank-Rider{color:gold}
+.rank-Mechanic{color:cyan}
+.rank-Prospect{color:gray}
 
-.admin{display:none;margin-top:20px}
+.admin{display:none}
 </style>
 </head>
 
 <body>
 
-<div id="loader">OUTLAWZ LOADING...</div>
-
-<header>
 <h1>OUTLAWZ</h1>
-<p>Together We Hit Hard</p>
-</header>
 
+<!-- JOIN -->
 <section>
-<h2>Founder</h2>
-<h3>Manjit Ojha</h3>
-<p style="color:orange">DEATH</p>
+<h2>Join Outlawz</h2>
+<input id="name" placeholder="Name"><br>
+<input id="bike" placeholder="Bike"><br>
+<textarea id="msg" placeholder="Why join?"></textarea><br>
+<input type="file" id="photo"><br>
+<button onclick="join()">Join</button>
+<p id="status"></p>
 </section>
 
+<!-- MEMBERS -->
 <section>
-<h2>🔥 Announcements</h2>
-<div id="notices"></div>
+<h2>Members</h2>
+<div id="members"></div>
 </section>
 
-<section>
-<h2>🔥 Gallery</h2>
-<div id="gallery"></div>
-</section>
-
+<!-- LOGIN -->
 <section>
 <h2>Founder Login</h2>
-<input type="password" id="pass" placeholder="Password">
-<br>
+<input id="email" placeholder="Email"><br>
+<input id="password" type="password" placeholder="Password"><br>
 <button onclick="login()">Login</button>
 
 <div class="admin" id="admin">
-<h3>Post</h3>
-<textarea id="text"></textarea><br>
-<input type="file" id="img"><br>
-<button onclick="addPost()">Add</button>
-
-<h3>Upload Images</h3>
-<input type="file" id="gimg" multiple><br>
-<button onclick="addGallery()">Upload</button>
+<h3>Join Requests</h3>
+<div id="requests"></div>
 </div>
 </section>
 
-<div id="modal" onclick="this.style.display='none'">
-<img id="modalImg">
-</div>
+<script type="module">
 
-<script>
-// ⚠️ Demo only (still not secure)
-const PASS="death1313";
-let admin=false;
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, collection, addDoc, getDocs, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
-let notices=JSON.parse(localStorage.getItem("n"))||[];
-let gallery=JSON.parse(localStorage.getItem("g"))||[];
+const firebaseConfig = {
+  apiKey: "YOUR_FIREBASE_CONFIG",
+};
 
-window.onload=()=>{
- setTimeout(()=>document.getElementById("loader").style.display="none",1500);
- render();
-}
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const storage = getStorage(app);
 
-function login(){
- if(document.getElementById("pass").value===PASS){
-  admin=true;
-  document.getElementById("admin").style.display="block";
- }
-}
+// JOIN
+window.join = async ()=>{
+ let name=document.getElementById("name").value;
+ let bike=document.getElementById("bike").value;
+ let msg=document.getElementById("msg").value;
+ let file=document.getElementById("photo").files[0];
 
-function save(){
- localStorage.setItem("n",JSON.stringify(notices));
- localStorage.setItem("g",JSON.stringify(gallery));
- render();
-}
+ if(!name||!bike||!file)return;
 
-function addPost(){
- let t=document.getElementById("text").value.trim();
- let f=document.getElementById("img").files[0];
- if(!t && !f) return;
+ const storageRef=ref(storage,"profiles/"+Date.now()+file.name);
+ await uploadBytes(storageRef,file);
+ const url=await getDownloadURL(storageRef);
 
- let d=new Date().toLocaleString();
- if(f){
-  let r=new FileReader();
-  r.onload=e=>{
-   notices.unshift({t,d,i:e.target.result});
-   save();
-  }
-  r.readAsDataURL(f);
- }else{
-  notices.unshift({t,d});save();
- }
-}
-
-function addGallery(){
- let files=document.getElementById("gimg").files;
- [...files].forEach(f=>{
-  let r=new FileReader();
-  r.onload=e=>{
-   gallery.unshift(e.target.result);
-   save();
-  }
-  r.readAsDataURL(f);
+ await addDoc(collection(db,"requests"),{
+  name,bike,msg,photo:url,status:"pending"
  });
-}
 
-function render(){
- let n=document.getElementById("notices");
- n.innerHTML="";
- notices.forEach((x,i)=>{
+ document.getElementById("status").innerText="Request Sent 🔥";
+};
+
+// LOGIN
+window.login=()=>{
+ let email=document.getElementById("email").value;
+ let password=document.getElementById("password").value;
+
+ signInWithEmailAndPassword(auth,email,password)
+  .then(()=>alert("Access Granted"))
+  .catch(()=>alert("Error"));
+};
+
+// AUTH STATE
+onAuthStateChanged(auth,user=>{
+ if(user){
+  admin.style.display="block";
+  loadRequests();
+ }
+});
+
+// LOAD REQUESTS
+async function loadRequests(){
+ let container=document.getElementById("requests");
+ container.innerHTML="";
+
+ let snap=await getDocs(collection(db,"requests"));
+
+ snap.forEach(docu=>{
+  let d=docu.data();
+
   let div=document.createElement("div");
   div.className="card";
-  div.innerHTML=`<b>${x.d}</b><br>${x.t||""}`;
-  if(x.i) div.innerHTML+=`<img src='${x.i}'>`;
-  if(admin) div.innerHTML+=`<button onclick='delN(${i})'>X</button>`;
-  n.appendChild(div);
- });
 
- let g=document.getElementById("gallery");
- g.innerHTML="";
- gallery.forEach((img,i)=>{
-  let el=document.createElement("img");
-  el.src=img;
-  el.className="gallery-img";
-  el.onclick=()=>{modalImg.src=img;modal.style.display="flex"};
-  g.appendChild(el);
+  div.innerHTML=`
+   <img src="${d.photo}">
+   <b>${d.name}</b> (${d.bike})<br>
+   ${d.msg}<br>
+
+   <select id="rank-${docu.id}">
+    <option>Prospect</option>
+    <option>Rider</option>
+    <option>Mechanic</option>
+    <option>Leader</option>
+   </select>
+
+   <button onclick="approve('${docu.id}')">Approve</button>
+  `;
+
+  container.appendChild(div);
  });
 }
 
-function delN(i){notices.splice(i,1);save();}
+// APPROVE
+window.approve=async(id)=>{
+ let rank=document.getElementById(`rank-${id}`).value;
+
+ await updateDoc(doc(db,"requests",id),{
+  status:"approved",
+  rank:rank
+ });
+
+ loadMembers();
+ loadRequests();
+};
+
+// LOAD MEMBERS
+async function loadMembers(){
+ let container=document.getElementById("members");
+ container.innerHTML="";
+
+ let snap=await getDocs(collection(db,"requests"));
+
+ snap.forEach(docu=>{
+  let d=docu.data();
+
+  if(d.status==="approved"){
+   let div=document.createElement("div");
+   div.className="card";
+
+   div.innerHTML=`
+    <img src="${d.photo}">
+    <b>${d.name}</b><br>
+    🏍 ${d.bike}<br>
+    <span class="rank-${d.rank}">👑 ${d.rank}</span>
+   `;
+
+   container.appendChild(div);
+  }
+ });
+}
+
+loadMembers();
+
 </script>
 
 </body>
