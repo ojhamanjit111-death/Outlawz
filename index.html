@@ -1,163 +1,117 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Outlawz | Official</title>
+<title>Outlawz Crew</title>
+
+<!-- Google Font -->
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
 
 <style>
+*{margin:0;padding:0;box-sizing:border-box}
 body{
-    margin:0;
-    font-family:Arial, sans-serif;
+    font-family:'Orbitron',sans-serif;
     background:black;
     color:gold;
-    text-align:center;
     overflow-x:hidden;
 }
 
-/* 🔥 Fire Background */
+/* 🔥 Animated Background */
 body::before{
     content:"";
     position:fixed;
-    top:0;
-    left:0;
-    width:100%;
-    height:100%;
+    width:100%;height:100%;
     background:radial-gradient(circle at 50% 100%, #ff4500 0%, #ff0000 30%, #000 70%);
-    animation:fireMove 3s infinite alternate ease-in-out;
-    z-index:-1;
-    opacity:0.5;
+    animation:fireMove 4s infinite alternate ease-in-out;
+    z-index:-1;opacity:.4;
 }
+@keyframes fireMove{from{transform:scale(1)}to{transform:scale(1.08)}}
 
-@keyframes fireMove{
-    0%{ transform:scale(1); }
-    100%{ transform:scale(1.05); }
+/* Loader */
+#loader{
+ position:fixed;
+ width:100%;height:100%;
+ background:black;
+ display:flex;
+ justify-content:center;
+ align-items:center;
+ font-size:28px;
+ z-index:9999;
 }
 
 header{
-    padding:20px;
-    border-bottom:2px solid gold;
+ text-align:center;
+ padding:25px;
+ border-bottom:2px solid gold;
 }
+header h1{font-size:42px;letter-spacing:3px}
 
 section{
-    padding:30px;
-    border-bottom:1px solid gold;
+ padding:40px 20px;
+ text-align:center;
+ border-bottom:1px solid rgba(255,215,0,0.3);
 }
 
 button{
-    background:gold;
-    color:black;
-    padding:8px 14px;
-    border:none;
-    margin:5px;
-    cursor:pointer;
-    font-weight:bold;
+ background:gold;color:black;
+ padding:10px 16px;border:none;
+ margin:5px;cursor:pointer;
+ font-weight:bold;
+ transition:.3s;
+}
+button:hover{box-shadow:0 0 15px gold;transform:scale(1.05)}
+
+input,textarea{
+ width:90%;max-width:400px;
+ padding:10px;margin:8px;
 }
 
-.delete-btn{
-    background:red;
-    color:white;
+/* Cards */
+.card{
+ background:rgba(0,0,0,.7);
+ border:1px solid gold;
+ padding:15px;margin:15px auto;
+ max-width:600px;
+ box-shadow:0 0 15px orange;
 }
-
-input, textarea{
-    padding:10px;
-    margin:5px;
-    width:80%;
-    max-width:400px;
-}
-
-.notice-box{
-    background:rgba(0,0,0,0.7);
-    border:1px solid gold;
-    padding:15px;
-    margin:15px auto;
-    width:85%;
-    max-width:600px;
-    text-align:left;
-    box-shadow:0 0 10px orange;
-}
-
-.notice-box img{
-    width:100%;
-    margin-top:10px;
-    border:1px solid gold;
-}
+.card img{width:100%;margin-top:10px}
 
 /* Gallery */
 #gallery{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(120px,1fr));
-    gap:12px;
-    width:90%;
-    max-width:900px;
-    margin:auto;
+ display:grid;
+ grid-template-columns:repeat(auto-fit,minmax(130px,1fr));
+ gap:12px;
+ max-width:1000px;margin:auto;
 }
-
-.gallery-item{
-    position:relative;
-}
-
 .gallery-img{
-    width:100%;
-    height:120px;
-    object-fit:cover;
-    border:2px solid gold;
-    box-shadow:0 0 10px orange;
-    cursor:pointer;
+ width:100%;height:130px;
+ object-fit:cover;
+ border:2px solid gold;
+ cursor:pointer;
+ transition:.3s;
 }
-
-.gallery-delete{
-    position:absolute;
-    top:5px;
-    right:5px;
-    background:red;
-    color:white;
-    border:none;
-    cursor:pointer;
-    padding:4px 8px;
-}
+.gallery-img:hover{transform:scale(1.1)}
 
 /* Modal */
-#imageModal{
-    display:none;
-    position:fixed;
-    top:0;
-    left:0;
-    width:100%;
-    height:100%;
-    background:rgba(0,0,0,0.95);
-    justify-content:center;
-    align-items:center;
-    z-index:9999;
+#modal{
+ display:none;
+ position:fixed;
+ width:100%;height:100%;
+ background:rgba(0,0,0,.95);
+ justify-content:center;
+ align-items:center;
+ z-index:999;
 }
+#modal img{max-width:90%;max-height:90%}
 
-#imageModal img{
-    max-width:90%;
-    max-height:90%;
-    border:3px solid gold;
-    box-shadow:0 0 25px orange;
-}
-
-#imageModal span{
-    position:absolute;
-    top:20px;
-    right:30px;
-    font-size:35px;
-    color:gold;
-    cursor:pointer;
-    font-weight:bold;
-}
-
-.admin-panel{
-    display:none;
-    border-top:1px solid gold;
-    margin-top:20px;
-    padding-top:20px;
-}
+.admin{display:none;margin-top:20px}
 </style>
 </head>
 
 <body>
+
+<div id="loader">OUTLAWZ LOADING...</div>
 
 <header>
 <h1>OUTLAWZ</h1>
@@ -167,198 +121,121 @@ input, textarea{
 <section>
 <h2>Founder</h2>
 <h3>Manjit Ojha</h3>
-<h4 style="color:orange;">DEATH</h4>
+<p style="color:orange">DEATH</p>
 </section>
 
-<!-- ANNOUNCEMENTS -->
 <section>
-<h2>🔥 Official Announcements</h2>
-<div id="noticeBoard"></div>
+<h2>🔥 Announcements</h2>
+<div id="notices"></div>
 </section>
 
-<!-- GALLERY -->
 <section>
-<h2>🔥 Outlawz Gallery</h2>
+<h2>🔥 Gallery</h2>
 <div id="gallery"></div>
 </section>
 
-<!-- FOUNDER LOGIN -->
 <section>
 <h2>Founder Login</h2>
-<input type="password" id="adminPass" placeholder="Enter Founder Password">
+<input type="password" id="pass" placeholder="Password">
 <br>
 <button onclick="login()">Login</button>
 
-<div class="admin-panel" id="adminPanel">
+<div class="admin" id="admin">
+<h3>Post</h3>
+<textarea id="text"></textarea><br>
+<input type="file" id="img"><br>
+<button onclick="addPost()">Add</button>
 
-<h3>Post Announcement</h3>
-<textarea id="newNotice" rows="4" placeholder="Write announcement..."></textarea>
-<br>
-<input type="file" id="noticeImage" accept="image/*">
-<br>
-<button onclick="addNotice()">Post</button>
-
-<hr>
-
-<h3>Upload to Gallery (Multiple)</h3>
-<input type="file" id="galleryImage" accept="image/*" multiple>
-<br>
-<button onclick="addToGallery()">Upload Images</button>
-
+<h3>Upload Images</h3>
+<input type="file" id="gimg" multiple><br>
+<button onclick="addGallery()">Upload</button>
 </div>
 </section>
 
-<!-- IMAGE MODAL -->
-<div id="imageModal">
-<span onclick="closeModal()">✖</span>
+<div id="modal" onclick="this.style.display='none'">
 <img id="modalImg">
 </div>
 
 <script>
+// ⚠️ Demo only (still not secure)
+const PASS="death1313";
+let admin=false;
 
-const PASSWORD="death1313";
-let isAdmin=false;
+let notices=JSON.parse(localStorage.getItem("n"))||[];
+let gallery=JSON.parse(localStorage.getItem("g"))||[];
 
-let notices=JSON.parse(localStorage.getItem("notices"))||[];
-let galleryImages=JSON.parse(localStorage.getItem("galleryImages"))||[];
+window.onload=()=>{
+ setTimeout(()=>document.getElementById("loader").style.display="none",1500);
+ render();
+}
 
 function login(){
-    if(document.getElementById("adminPass").value===PASSWORD){
-        isAdmin=true;
-        document.getElementById("adminPanel").style.display="block";
-        displayNotices();
-        displayGallery();
-        alert("Founder Access Granted");
-    }else{
-        alert("Access Denied");
-    }
+ if(document.getElementById("pass").value===PASS){
+  admin=true;
+  document.getElementById("admin").style.display="block";
+ }
 }
 
-/* ANNOUNCEMENTS */
-
-function saveNotices(){
-    localStorage.setItem("notices",JSON.stringify(notices));
-    displayNotices();
+function save(){
+ localStorage.setItem("n",JSON.stringify(notices));
+ localStorage.setItem("g",JSON.stringify(gallery));
+ render();
 }
 
-function addNotice(){
-    const text=document.getElementById("newNotice").value;
-    const file=document.getElementById("noticeImage").files[0];
-    if(!text&&!file)return;
+function addPost(){
+ let t=document.getElementById("text").value.trim();
+ let f=document.getElementById("img").files[0];
+ if(!t && !f) return;
 
-    const date=new Date().toLocaleString();
-
-    if(file){
-        const reader=new FileReader();
-        reader.onload=function(e){
-            notices.unshift({text,date,image:e.target.result});
-            saveNotices();
-        }
-        reader.readAsDataURL(file);
-    }else{
-        notices.unshift({text,date});
-        saveNotices();
-    }
-
-    document.getElementById("newNotice").value="";
-    document.getElementById("noticeImage").value="";
+ let d=new Date().toLocaleString();
+ if(f){
+  let r=new FileReader();
+  r.onload=e=>{
+   notices.unshift({t,d,i:e.target.result});
+   save();
+  }
+  r.readAsDataURL(f);
+ }else{
+  notices.unshift({t,d});save();
+ }
 }
 
-function deleteNotice(index){
-    notices.splice(index,1);
-    saveNotices();
+function addGallery(){
+ let files=document.getElementById("gimg").files;
+ [...files].forEach(f=>{
+  let r=new FileReader();
+  r.onload=e=>{
+   gallery.unshift(e.target.result);
+   save();
+  }
+  r.readAsDataURL(f);
+ });
 }
 
-function displayNotices(){
-    const board=document.getElementById("noticeBoard");
-    board.innerHTML="";
-    notices.forEach((n,i)=>{
-        const div=document.createElement("div");
-        div.className="notice-box";
-        div.innerHTML="<strong>"+n.date+"</strong><br>"+(n.text||"");
-        if(n.image){
-            div.innerHTML+="<img src='"+n.image+"'>";
-        }
-        if(isAdmin){
-            div.innerHTML+="<br><button class='delete-btn' onclick='deleteNotice("+i+")'>Delete</button>";
-        }
-        board.appendChild(div);
-    });
+function render(){
+ let n=document.getElementById("notices");
+ n.innerHTML="";
+ notices.forEach((x,i)=>{
+  let div=document.createElement("div");
+  div.className="card";
+  div.innerHTML=`<b>${x.d}</b><br>${x.t||""}`;
+  if(x.i) div.innerHTML+=`<img src='${x.i}'>`;
+  if(admin) div.innerHTML+=`<button onclick='delN(${i})'>X</button>`;
+  n.appendChild(div);
+ });
+
+ let g=document.getElementById("gallery");
+ g.innerHTML="";
+ gallery.forEach((img,i)=>{
+  let el=document.createElement("img");
+  el.src=img;
+  el.className="gallery-img";
+  el.onclick=()=>{modalImg.src=img;modal.style.display="flex"};
+  g.appendChild(el);
+ });
 }
 
-displayNotices();
-
-/* GALLERY */
-
-function saveGallery(){
-    localStorage.setItem("galleryImages",JSON.stringify(galleryImages));
-    displayGallery();
-}
-
-function addToGallery(){
-    const files=document.getElementById("galleryImage").files;
-    if(!files.length)return;
-
-    Array.from(files).forEach(file=>{
-        const reader=new FileReader();
-        reader.onload=function(e){
-            galleryImages.unshift(e.target.result);
-            saveGallery();
-        }
-        reader.readAsDataURL(file);
-    });
-
-    document.getElementById("galleryImage").value="";
-}
-
-function deleteImage(index){
-    galleryImages.splice(index,1);
-    saveGallery();
-}
-
-function displayGallery(){
-    const gallery=document.getElementById("gallery");
-    gallery.innerHTML="";
-    galleryImages.forEach((img,i)=>{
-        const wrapper=document.createElement("div");
-        wrapper.className="gallery-item";
-
-        const image=document.createElement("img");
-        image.src=img;
-        image.className="gallery-img";
-        image.onclick=function(){openModal(img);};
-
-        wrapper.appendChild(image);
-
-        if(isAdmin){
-            const del=document.createElement("button");
-            del.innerText="X";
-            del.className="gallery-delete";
-            del.onclick=function(){deleteImage(i)};
-            wrapper.appendChild(del);
-        }
-
-        gallery.appendChild(wrapper);
-    });
-}
-
-displayGallery();
-
-/* MODAL */
-
-function openModal(src){
-    document.getElementById("imageModal").style.display="flex";
-    document.getElementById("modalImg").src=src;
-}
-
-function closeModal(){
-    document.getElementById("imageModal").style.display="none";
-}
-
-document.getElementById("imageModal").addEventListener("click",function(e){
-    if(e.target===this) closeModal();
-});
-
+function delN(i){notices.splice(i,1);save();}
 </script>
 
 </body>
